@@ -1,0 +1,24 @@
+{
+  "name": "io-spi",
+  "version": "0.1.0",
+  "description": "SPI interface for Node.js/Electron with ioctl",
+  "main": "index.js",
+  "scripts": {
+    "install": "node-gyp rebuild",
+    "build": "node-gyp rebuild",
+    "prebuild": "prebuildify --napi --strip",
+    "prebuild:ci": "prebuildify-ci"
+  },
+  "keywords": ["SPI", "nodejs", "Raspberry Pi"],
+  "author": "Maarten Vandekeybus",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "node-addon-api": "^8.3.1"
+  },
+  "devDependencies": {
+    "node-gyp": "^11.2.0",
+    "prebuildify": "^6.0.1",
+    "prebuildify-ci": "^1.0.5"
+  }
+}
