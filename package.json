@@ -1,7 +1,7 @@
 {
   "name": "io-spi",
   "version": "0.1.0",
-  "description": "Native SPI interface for Node.js/Electron with Linux ioctl",
+  "description": "Native Node.js addon for SPI devices on Linux with ioctl",
   "license": "MIT",
   "author": "Maarten Vandekeybus",
   "main": "index.js",
@@ -19,10 +19,12 @@
     "SPI",
     "spidev",
     "nodejs",
+    "async",
     "Raspberry Pi",
     "rpi",
     "Orange Pi",
     "ioctl",
+    "embedded",
     "linux"
   ],
   "devDependencies": {
@@ -31,5 +33,6 @@
   "dependencies": {
     "node-addon-api": "^8.3.1"
   },
-  "gypfile": true
+  "gypfile": true,
+  "os": ["linux"]
 }
