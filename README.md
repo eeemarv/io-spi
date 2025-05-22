@@ -81,7 +81,9 @@ CE1 (GPIO7) | - | CS
 
 ```bash
 
-npm install @eeemarv/io-spi
+#
+# Not published on npm yet, will follow later.
+#
 ```
 
 ## Prerequisites
