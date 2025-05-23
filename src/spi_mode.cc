@@ -4,6 +4,19 @@
 #include <sys/ioctl.h>  // For ioctl()
 #include <linux/spi/spidev.h>  // For SPI_IOC_WR_MODE etc
 
+void SPIDevice::SetModeInternal(uint8_t mode) {
+    uint8_t read_mode = 0;
+    IoctlOrThrow(SPI_IOC_RD_MODE, &read_mode, "SPI_IOC_RD_MODE");
+
+    if (Env().IsExceptionPending()){
+        return;
+    }// stop on error
+
+    if (read_mode != mode) {
+        IoctlOrThrow(SPI_IOC_WR_MODE, &mode, "SPI_IOC_WR_MODE");
+    }
+}
+
 Napi::Value SPIDevice::SetMode(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
@@ -17,13 +30,9 @@ Napi::Value SPIDevice::SetMode(const Napi::CallbackInfo& info) {
 
     uint8_t mode = info[0].As<Napi::Number>().Uint32Value() & 0x03;
 
-    if (ioctl(this->fd, SPI_IOC_WR_MODE, &mode) == -1) {
-        Napi::Error::New(env, "Failed to set SPI mode")
-            .ThrowAsJavaScriptException();
-        return env.Null();
-    }
+    SetModeInternal(mode);
 
-    return env.Undefined();
+    return env.IsExceptionPending() ? env.Null() : env.Undefined();
 }
 
 Napi::Value SPIDevice::GetMode(const Napi::CallbackInfo& info) {
@@ -32,10 +41,9 @@ Napi::Value SPIDevice::GetMode(const Napi::CallbackInfo& info) {
     SPI_LOCK_GUARD;
 
     uint8_t mode;
+    IoctlOrThrow(SPI_IOC_RD_MODE, &mode, "SPI_IOC_RD_MODE");
 
-    if (ioctl(this->fd, SPI_IOC_RD_MODE, &mode) == -1) {
-        Napi::Error::New(env, "Failed to read SPI mode")
-            .ThrowAsJavaScriptException();
+    if (env.IsExceptionPending()){
         return env.Null();
     }
 

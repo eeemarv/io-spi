@@ -57,19 +57,19 @@ SPIDevice::SPIDevice(const Napi::CallbackInfo& info)
         }
     }
 
-    // --- Set options via ioctl
-    if (ioctl(fd, SPI_IOC_WR_MODE, &mode) < 0) {
-        Napi::Error::New(env, "Failed to set SPI mode").ThrowAsJavaScriptException();
+    // --- Set options
+    SetModeInternal(mode);
+    if (env.IsExceptionPending()) {
         return;
     }
 
-    if (ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits) < 0) {
-        Napi::Error::New(env, "Failed to set bits per word").ThrowAsJavaScriptException();
+    SetMaxSpeedHzInternal(speed);
+    if (env.IsExceptionPending()){
         return;
     }
 
-    if (ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed) < 0) {
-        Napi::Error::New(env, "Failed to set max speed").ThrowAsJavaScriptException();
+    SetBitsPerWordInternal(bits);
+    if (env.IsExceptionPending()){
         return;
     }
 }

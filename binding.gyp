@@ -5,6 +5,7 @@
         "src/spi_mode.cc",
         "src/spi_bits.cc",
         "src/spi_speed.cc",
+        "src/spi_ioctl.cc",
         "src/spi_validate_mode.cc",
         "src/spi_validate_bits.cc",
         "src/spi_validate_speed.cc",

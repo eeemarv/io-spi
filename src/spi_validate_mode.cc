@@ -33,3 +33,13 @@ inline void ValidateMode(uint32_t mode, Napi::Env env) {
 }
 
 } // namespace spiutil
+
+uint8_t SPIDevice::ParseMode(const Napi::Value& val) {
+    Napi::Env env = val.Env();
+    if (!val.IsNumber()) {
+        throw Napi::TypeError::New(env, "'mode' must be a number");
+    }
+    uint32_t mode = val.As<Napi::Number>().Uint32Value();
+    ValidateMode(env, mode);
+    return static_cast<uint8_t>(mode);
+}

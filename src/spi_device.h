@@ -27,6 +27,11 @@ private:
     int fd = -1;
     std::mutex mutex;
 
+    void IoctlOrThrow(unsigned long request, void* arg, const char* action);
+    void SetModeInternal(uint8_t mode);
+    void SetMaxSpeedHzInternal(uint32_t speed);
+    void SetBitsPerWordInternal(uint8_t bits);
+
     static void ValidateMode(Napi::Env env, uint32_t mode);
     static void ValidateBitsPerWord(Napi::Env env, uint32_t bits);
     static void ValidateMaxSpeedHz(Napi::Env env, uint32_t speed);

@@ -2,6 +2,19 @@
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>  // For SPI_IOC_WR_MODE etc
 
+void SPIDevice::SetMaxSpeedHzInternal(uint32_t speed) {
+  uint8_t read_speed = 0;
+  IoctlOrThrow(SPI_IOC_RD_MAX_SPEED_HZ, &read_speed, "SPI_IOC_RD_MAX_SPEED_HZ");
+
+  if (Env().IsExceptionPending()){
+    return;
+  } // stop on error
+
+  if (read_speed != speed) {
+    IoctlOrThrow(SPI_IOC_WR_MAX_SPEED_HZ, &speed, "SPI_IOC_WR_MAX_SPEED_HZ");
+  }
+}
+
 Napi::Value SPIDevice::SetMaxSpeedHz(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
@@ -14,13 +27,9 @@ Napi::Value SPIDevice::SetMaxSpeedHz(const Napi::CallbackInfo& info) {
     }
 
     uint32_t speed = info[0].As<Napi::Number>().Uint32Value();
-    if (ioctl(this->fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed) == -1) {
-        Napi::Error::New(env, "Failed to set speed")
-            .ThrowAsJavaScriptException();
-        return env.Null();
-    }
+    SetMaxSpeedHzInternal(speed);
 
-    return env.Undefined();
+    return env.IsExceptionPending() ? env.Null() : env.Undefined();
 }
 
 Napi::Value SPIDevice::GetMaxSpeedHz(const Napi::CallbackInfo& info) {
@@ -29,10 +38,9 @@ Napi::Value SPIDevice::GetMaxSpeedHz(const Napi::CallbackInfo& info) {
     SPI_LOCK_GUARD;
 
     uint32_t speed;
+    IoctlOrThrow(SPI_IOC_RD_MAX_SPEED_HZ, &speed, "SPI_IOC_RD_MAX_SPEED_HZ");
 
-    if (ioctl(this->fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed) == -1) {
-        Napi::Error::New(env, "Failed to read speed")
-            .ThrowAsJavaScriptException();
+    if (env.IsExceptionPending()){
         return env.Null();
     }
 

@@ -2,6 +2,19 @@
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>  // For SPI_IOC_WR_MODE etc
 
+void SPIDevice::SetBitsPerWordInternal(uint8_t bits) {
+  uint8_t read_bits = 0;
+  IoctlOrThrow(SPI_IOC_RD_BITS_PER_WORD, &read_bits, "SPI_IOC_RD_BITS_PER_WORD");
+
+  if (Env().IsExceptionPending()){
+    return;
+  }// stop on error
+
+  if (read_bits != bits) {
+    IoctlOrThrow(SPI_IOC_WR_MODE, &bits, "SPI_IOC_WR_MODE");
+  }
+}
+
 Napi::Value SPIDevice::SetBitsPerWord(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
 
@@ -15,13 +28,9 @@ Napi::Value SPIDevice::SetBitsPerWord(const Napi::CallbackInfo& info) {
 
     uint8_t bits = info[0].As<Napi::Number>().Uint32Value();
 
-    if (ioctl(this->fd, SPI_IOC_WR_BITS_PER_WORD, &bits) == -1) {
-        Napi::Error::New(env, "Failed to set bits per word")
-            .ThrowAsJavaScriptException();
-        return env.Null();
-    }
+    SetBitsPerWordInternal(bits);
 
-    return env.Undefined();
+    return env.IsExceptionPending() ? env.Null() : env.Undefined();
 }
 
 Napi::Value SPIDevice::GetBitsPerWord(const Napi::CallbackInfo& info) {
@@ -30,10 +39,9 @@ Napi::Value SPIDevice::GetBitsPerWord(const Napi::CallbackInfo& info) {
     SPI_LOCK_GUARD;
 
     uint8_t bits;
+    IoctlOrThrow(SPI_IOC_RD_BITS_PER_WORD, &bits, "SPI_IOC_RD_BITS_PER_WORD");
 
-    if (ioctl(this->fd, SPI_IOC_RD_BITS_PER_WORD, &bits) == -1) {
-        Napi::Error::New(env, "Failed to read bits per word")
-            .ThrowAsJavaScriptException();
+    if (env.IsExceptionPending()){
         return env.Null();
     }
 
