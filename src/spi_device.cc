@@ -53,7 +53,7 @@ SPIDevice::SPIDevice(const Napi::CallbackInfo& info)
         }
 
         if (options.Has("max_speed_hz")) {
-            bits = ParseMaxSpeedHz(options.Get("max_speed_hz"));
+            speed = ParseMaxSpeedHz(options.Get("max_speed_hz"));
         }
     }
 
