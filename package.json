@@ -4,9 +4,13 @@
   "description": "Native Node.js addon for SPI devices on Linux with ioctl",
   "license": "MIT",
   "author": "Maarten Vandekeybus",
-  "main": "index.js",
-  "exports": "./index.js",
+  "main": "./index.mjs",
+  "exports": {
+    "import": "./index.mjs",
+    "require": "./index.cjs"
+  },
   "type": "module",
+  "types": "./index.d.ts",
   "engines": {
     "node": ">=18"
   },

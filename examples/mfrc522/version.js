@@ -1,6 +1,6 @@
-import SPI from '../../index.js';
+import SPIDevice from '../../index.mjs';
 
-const spi = new SPI('/dev/spidev0.0', {
+const spi = new SPIDevice('/dev/spidev0.0', {
     max_speed_hz: 2_000_000
 });
 

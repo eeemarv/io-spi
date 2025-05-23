@@ -1,4 +1,4 @@
-const SPIDevice = require('../index.js');
+import SPIDevice from '../index.mjs';
 
 const spi = new SPIDevice('/dev/spidev0.0');
 

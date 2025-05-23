@@ -1,5 +1,7 @@
 # Node Native SPI Addon
 
+![TypeScript](https://img.shields.io/badge/types-included-blue.svg)
+
 A high-performance Node.js native addon for SPI communication on Linux, leveraging direct spidev.h APIs.
 Features
 
@@ -11,13 +13,18 @@ Features
 
 * Getters for current device settings.
 
+* Built-in TypeScript type declarations.
+
 ## Concurrency & Multiple Chip Select (CS)
 
 ### Non-Blocking API
 
 All transfers are __asynchronous__ by design:
 
-```javascript
+```js
+import SPIDevice from '..not_yet_published..';
+spi = new SPIDevice('/dev/spidev0.0');
+
 // Fire-and-forget transfer
 spi.transfer([txBuffer])
    .then([rxBuffer] => console.log('Done!'))
@@ -36,7 +43,7 @@ spi.transfer([txBuffer])
 
 To control multiple SPI slaves, create separate instances per CS
 
-```javascript
+```js
 // Each CS line gets its own instance
 // each instance contains its own configuration:
 // mode, max_speed_hz and bits_per_word
@@ -102,21 +109,15 @@ sudo apt-get install build-essential python3
 
 ### Import
 
-```javascript
-
-const SPIDevice = require('eeemarv/io-spi');
-```
-
-OR:
-
-```javascript
-
-import SPIDevice from 'eeemarv/io-spi';
+```js
+const SPIDevice = require('--not-yet-published');
+// OR
+import SPIDevice from '--not-yet-published';
 ```
 
 ### Initialize
 
-```javascript
+```js
 const spi = new SPIDevice('/dev/spidev0.0', {
   mode: 3,          // SPI mode (default 0)
   max_speed_hz: 500_000,  // Clock speed (default 1_000_000 or 1MHz)
@@ -126,7 +127,7 @@ const spi = new SPIDevice('/dev/spidev0.0', {
 
 Or configure dynamically:
 
-```javascript
+```js
 
 spi.setMode(2);           // Switch to mode 2
 spi.setMaxSpeedHz(250_000); // Reduce speed to 250kHz
@@ -142,8 +143,8 @@ console.log(spi.getMode()); // e.g., 2
 ```javascript
 spi.transfer([
   Buffer.from([0x01, 0x02])
-]).then((results) => {
-  console.log(results[0]); // Buffer with received data
+]).then(([result]) => {
+  console.log(result); // Buffer with received data
 }).catch((error) => {
   console.log(error);
 });
@@ -207,6 +208,29 @@ Parameter | Type | Description
 See [Linux spidev.h](https://github.com/torvalds/linux/blob/master/include/uapi/linux/spi/spidev.h) for full documentation of all parameters.
 Parameters `tx_nbits`, `rx_nbits` and `word_delay_usecs` can also be used, but these are not widely implemented.
 
+## TypeScript Support
+
+This package includes built-in TypeScript type declarations via `index.d.ts`.
+
+If you're using TypeScript, you'll get autocompletion and type checking automatically:
+
+```ts
+import SPIDevice from '--not-yet-published';
+
+const spi = new SPIDevice('/dev/spidev0.0', {
+  max_speed_hz: 1_000_000,
+  mode: 0
+});
+```
+
+Type definitions include
+
+* Constructor options
+* transfer() method with buffer/object overloads
+* Getter/setter methods for mode, speed, and bits-per-word
+
+No need to install @types/... — types are bundled with the package.
+
 ## Examples
 
 ### Loopback Test
@@ -221,10 +245,44 @@ node examples/loopback.js
 
 ### Permission Denied
 
-Ensure the user has access to /dev/spidev*
+If you get a "Permission denied" error when trying to open `/dev/spidev0.0`, it's likely because your user doesn't have the right group permissions.
+
+#### ✅ Step 1: Check device permissions
+
+List SPI devices:
+
+```bash
+ls -l /dev/spidev*
+```
+
+Example output:
+
+```bash
+crw-rw----+ 1 root dialout 153, 0 ... /dev/spidev0.0
+```
+
+This shows the device belongs to group dialout.
+
+#### ✅ Step 2: Add your user to the dialout group
+
+```bash
+sudo usermod -aG dialout $USER
+```
+
+On Raspberry Pi OS or other systems that use spi or gpio groups (e.g., Raspberry Pi OS with Desktop):
 
 ```bash
 sudo usermod -aG spi,gpio $USER
+```
+
+  You can check which groups exist by running `getent group` or `grep spi /etc/group`.
+
+#### ✅ Step 3: Log out and back in
+
+Group changes only apply after re-logging into your session, or you can reboot:
+
+```bash
+sudo reboot
 ```
 
 ### Invalid Arguments
