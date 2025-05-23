@@ -1,7 +1,7 @@
 import SPIDevice from '../../index.mjs';
 
 const spi = new SPIDevice('/dev/spidev0.0', {
-    max_speed_hz: 2_000_000
+    max_speed_hz: 500_000
 });
 
 function buildAddress(addr, read = false) {
