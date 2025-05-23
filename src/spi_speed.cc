@@ -3,7 +3,7 @@
 #include <linux/spi/spidev.h>  // For SPI_IOC_WR_MODE etc
 
 void SPIDevice::SetMaxSpeedHzInternal(uint32_t speed) {
-  uint8_t read_speed = 0;
+  uint32_t read_speed = 0;
   IoctlOrThrow(SPI_IOC_RD_MAX_SPEED_HZ, &read_speed, "SPI_IOC_RD_MAX_SPEED_HZ");
 
   if (Env().IsExceptionPending()){
