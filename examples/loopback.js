@@ -91,9 +91,37 @@ const testData = [
   console.log('\x1b[1;36m-- Loopback test --\x1b[0m');
 
   const testBuffers = testData.map((a) => Buffer.from(a));
-  //const result = await spi.transfer(testBuffers);
+  const result = await spi.transfer(testBuffers);
 
+  let pass = true;
 
+  for (let a = 0; a < testData.length; a++){
+    const tAry = testData[a];
+    const rAry = result[a];
+    let inStr = '\x1b[36mIn:  ';
+    let outStr = '\x1b[33mOut:\x1b[0m ';
+    for (let b = 0; b < tAry.length; b++){
+      const vIn = tAry[b];
+      const vOut = rAry[a];
+      inStr += vIn.toString(16).padStart(2, '0');
+      inStr += ' ';
+      if (vIn === vOut){
+        outStr += '\x1b[32m';
+      } else {
+        outStr += '\x1b[31m';
+        pass = false;
+      }
+      outStr += vOut.toString(16).padStart(2, '0');
+      outStr += '\x1b[0m ';
+    }
+    inStr += '\x1b[0m';
+    console.log(inStr);
+    console.log(outStr);
+  }
 
-
+  if (pass){
+    console.log('\x1b[1;32mThe test passed\x1b[0m');
+  } else {
+    console.log('\x1b[1;31mThe test failed\x1b[0m');
+  }
 })();
