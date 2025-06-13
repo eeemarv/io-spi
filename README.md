@@ -22,7 +22,7 @@ Features
 All transfers are __asynchronous__ by design:
 
 ```js
-import SPIDevice from '..not_yet_published..';
+import SPIDevice from '@eeemarv/io-spi';
 spi = new SPIDevice('/dev/spidev0.0');
 
 // Fire-and-forget transfer
@@ -110,9 +110,9 @@ sudo apt-get install build-essential python3
 ### Import
 
 ```js
-const SPIDevice = require('--not-yet-published');
+const SPIDevice = require('@eeemarv/io-spi');
 // OR
-import SPIDevice from '--not-yet-published';
+import SPIDevice from '@eeemarv/io-spi';
 ```
 
 ### Initialize
@@ -214,7 +214,7 @@ This package includes built-in TypeScript type declarations via `index.d.ts`.
 If you're using TypeScript, you'll get autocompletion and type checking automatically:
 
 ```ts
-import SPIDevice from '--not-yet-published';
+import SPIDevice from '@eeemarv/io-spi';
 
 const spi = new SPIDevice('/dev/spidev0.0', {
   max_speed_hz: 1_000_000,

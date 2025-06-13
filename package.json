@@ -1,5 +1,5 @@
 {
-  "name": "io-spi",
+  "name": "@eeemarv/io-spi",
   "version": "0.1.0",
   "description": "Promise Based Native Node.js Addon for SPI devices on Linux with ioctl",
   "license": "MIT",
@@ -41,5 +41,13 @@
   "gypfile": true,
   "os": [
     "linux"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eeemarv/io-spi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eeemarv/io-spi/issues"
+  },
+  "homepage": "https://github.com/eeemarv/io-spi#readme"
 }
