@@ -49,163 +49,169 @@ namespace {
 }
 
 Napi::Value SPIDevice::Transfer(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
-    auto deferred = Napi::Promise::Deferred::New(env);
+  Napi::Env env = info.Env();
+  auto deferred = Napi::Promise::Deferred::New(env);
 
-    if (info.Length() < 1 || !info[0].IsArray()) {
-        Napi::TypeError::New(env, "Array of transfer messages expected")
-            .ThrowAsJavaScriptException();
-        return env.Null();
-    }
+  if (info.Length() < 1 || !info[0].IsArray()) {
+    Napi::TypeError::New(env, "Array of transfer messages expected")
+      .ThrowAsJavaScriptException();
+    return env.Null();
+  }
 
-    Napi::Array msgArray = info[0].As<Napi::Array>();
-    std::vector<spi_ioc_transfer> transfers;
-    std::vector<Napi::Reference<Napi::Buffer<uint8_t>>> bufferRefs;
-    transfers.reserve(msgArray.Length());
-    bufferRefs.reserve(msgArray.Length());
+  Napi::Array msgArray = info[0].As<Napi::Array>();
 
-    for (uint32_t i = 0; i < msgArray.Length(); i++) {
+  std::vector<spi_ioc_transfer> transfers;
+  std::vector<Napi::Reference<Napi::Buffer<uint8_t>>> txRefs;
+  std::vector<Napi::Reference<Napi::Buffer<uint8_t>>> rxRefs;
 
-        Napi::Value val = msgArray[i];
-        spi_ioc_transfer tr = {};
+  transfers.reserve(msgArray.Length());
+  txRefs.reserve(msgArray.Length());
+  rxRefs.reserve(msgArray.Length());
 
-        Napi::Buffer<uint8_t> txBuf;
-        Napi::Buffer<uint8_t> rxBuf;
+  for (uint32_t i = 0; i < msgArray.Length(); i++) {
 
-        try {
-            if (val.IsBuffer()) {
-                // Simple buffer case
-                txBuf = val.As<Napi::Buffer<uint8_t>>();
-                ValidateBuffer(env, txBuf);
-                rxBuf = Napi::Buffer<uint8_t>::New(env, txBuf.Length());
-            }
-            else if (val.IsObject()) {
-                // Configured transfer case
-                Napi::Object obj = val.As<Napi::Object>();
-                if (!obj.Has("tx_buf") || !obj.Get("tx_buf").IsBuffer()) {
-                    throw Napi::Error::New(env, "Transfer object requires tx_buf Buffer");
-                }
+    Napi::Value val = msgArray[i];
+    spi_ioc_transfer tr = {};
 
-                txBuf = obj.Get("tx_buf").As<Napi::Buffer<uint8_t>>();
-                ValidateBuffer(env, txBuf);
-                rxBuf = Napi::Buffer<uint8_t>::New(env, txBuf.Length());
+    Napi::Buffer<uint8_t> txBuf;
+    Napi::Buffer<uint8_t> rxBuf;
 
-                // Apply optional parameters
-                if (obj.Has("speed_hz")){
-                    tr.speed_hz = obj.Get("speed_hz").As<Napi::Number>().Uint32Value();
-                }
-
-                if (obj.Has("bits_per_word")) {
-                    uint32_t bits_per_word = obj.Get("bits_per_word").As<Napi::Number>().Uint32Value();
-                    ValidateBitLength(env, bits_per_word, "bits_per_word");
-                    tr.bits_per_word = static_cast<uint8_t>(bits_per_word);
-                }
-
-                if (obj.Has("delay_usecs")) {
-                    uint32_t delay_usecs = obj.Get("delay_usecs").As<Napi::Number>().Uint32Value();
-
-                    // Absolute maximum defined by Linux SPI headers
-                    const uint32_t MAX_DELAY_US = 65535;
-
-                    if (delay_usecs > MAX_DELAY_US) {
-                        throw Napi::Error::New(env,
-                            "delay_usecs cannot exceed " +
-                            std::to_string(MAX_DELAY_US) + " µs");
-                    }
-
-                    tr.delay_usecs = static_cast<uint16_t>(delay_usecs);
-                }
-
-                if (obj.Has("cs_change")) {
-                    uint32_t cs_change = obj.Get("cs_change").As<Napi::Number>().Uint32Value();
-
-                    if (cs_change != 0 && cs_change != 1) {
-                        throw Napi::Error::New(env,
-                            "cs_change must be 0 (keep CS active) or 1 (release CS)");
-                    }
-
-                    tr.cs_change = static_cast<uint8_t>(cs_change);
-                }
-
-                if (obj.Has("word_delay_usecs")) {
-                    uint32_t word_delay_usecs = obj.Get("word_delay_usecs").As<Napi::Number>().Uint32Value();
-
-                    // Kernel-defined maximum (from spidev.h)
-                    const uint32_t MAX_WORD_DELAY_US = 255;
-
-                    if (word_delay_usecs > MAX_WORD_DELAY_US) {
-                        throw Napi::Error::New(env,
-                            "word_delay_usecs cannot exceed " +
-                            std::to_string(MAX_WORD_DELAY_US) + " µs");
-                    }
-
-                    tr.word_delay_usecs = static_cast<uint16_t>(word_delay_usecs);
-                }
-
-                if (obj.Has("tx_nbits")) {
-                    uint32_t tx_nbits = obj.Get("tx_nbits").As<Napi::Number>().Uint32Value();
-                    ValidateBitLength(env, tx_nbits, "tx_nbits");
-                    tr.tx_nbits = static_cast<uint8_t>(tx_nbits);
-                }
-
-                if (obj.Has("rx_nbits")) {
-                    uint32_t rx_nbits = obj.Get("rx_nbits").As<Napi::Number>().Uint32Value();
-                    ValidateBitLength(env, rx_nbits, "rx_nbits");
-                    tr.rx_nbits = static_cast<uint8_t>(rx_nbits);
-                }
-            }
-            else {
-                throw Napi::Error::New(env, "Each transfer must be a Buffer or Object");
-            }
-
-            // Set up transfer struct
-            tr.tx_buf = (unsigned long)txBuf.Data();
-            tr.rx_buf = (unsigned long)rxBuf.Data();
-            tr.len = txBuf.Length();
-
-            transfers.push_back(tr);
-            bufferRefs.push_back(Napi::Persistent(rxBuf));
+    try {
+      if (val.IsBuffer()) {
+        // Simple buffer case
+        txBuf = val.As<Napi::Buffer<uint8_t>>();
+        ValidateBuffer(env, txBuf);
+        rxBuf = Napi::Buffer<uint8_t>::New(env, txBuf.Length());
+      }
+      else if (val.IsObject()) {
+        // Configured transfer case
+        Napi::Object obj = val.As<Napi::Object>();
+        if (!obj.Has("tx_buf") || !obj.Get("tx_buf").IsBuffer()) {
+          throw Napi::Error::New(env, "Transfer object requires tx_buf Buffer");
         }
-        catch (const Napi::Error& e) {
-            e.ThrowAsJavaScriptException();
-            return env.Null();
+
+        txBuf = obj.Get("tx_buf").As<Napi::Buffer<uint8_t>>();
+        ValidateBuffer(env, txBuf);
+        rxBuf = Napi::Buffer<uint8_t>::New(env, txBuf.Length());
+
+        // Apply optional parameters
+        if (obj.Has("speed_hz")){
+          tr.speed_hz = obj.Get("speed_hz").As<Napi::Number>().Uint32Value();
         }
+
+        if (obj.Has("bits_per_word")) {
+          uint32_t bits_per_word = obj.Get("bits_per_word").As<Napi::Number>().Uint32Value();
+          ValidateBitLength(env, bits_per_word, "bits_per_word");
+          tr.bits_per_word = static_cast<uint8_t>(bits_per_word);
+        }
+
+        if (obj.Has("delay_usecs")) {
+          uint32_t delay_usecs = obj.Get("delay_usecs").As<Napi::Number>().Uint32Value();
+
+          // Absolute maximum defined by Linux SPI headers
+          const uint32_t MAX_DELAY_US = 65535;
+
+          if (delay_usecs > MAX_DELAY_US) {
+            throw Napi::Error::New(env,
+              "delay_usecs cannot exceed " +
+              std::to_string(MAX_DELAY_US) + " µs");
+          }
+
+          tr.delay_usecs = static_cast<uint16_t>(delay_usecs);
+        }
+
+        if (obj.Has("cs_change")) {
+          uint32_t cs_change = obj.Get("cs_change").As<Napi::Number>().Uint32Value();
+
+          if (cs_change != 0 && cs_change != 1) {
+            throw Napi::Error::New(env,
+              "cs_change must be 0 (keep CS active) or 1 (release CS)");
+          }
+
+          tr.cs_change = static_cast<uint8_t>(cs_change);
+        }
+
+        if (obj.Has("word_delay_usecs")) {
+          uint32_t word_delay_usecs = obj.Get("word_delay_usecs").As<Napi::Number>().Uint32Value();
+
+          // Kernel-defined maximum (from spidev.h)
+          const uint32_t MAX_WORD_DELAY_US = 255;
+
+          if (word_delay_usecs > MAX_WORD_DELAY_US) {
+            throw Napi::Error::New(env,
+              "word_delay_usecs cannot exceed " +
+              std::to_string(MAX_WORD_DELAY_US) + " µs");
+          }
+
+          tr.word_delay_usecs = static_cast<uint16_t>(word_delay_usecs);
+        }
+
+        if (obj.Has("tx_nbits")) {
+          uint32_t tx_nbits = obj.Get("tx_nbits").As<Napi::Number>().Uint32Value();
+          ValidateBitLength(env, tx_nbits, "tx_nbits");
+          tr.tx_nbits = static_cast<uint8_t>(tx_nbits);
+        }
+
+        if (obj.Has("rx_nbits")) {
+          uint32_t rx_nbits = obj.Get("rx_nbits").As<Napi::Number>().Uint32Value();
+          ValidateBitLength(env, rx_nbits, "rx_nbits");
+          tr.rx_nbits = static_cast<uint8_t>(rx_nbits);
+        }
+      }
+      else {
+        throw Napi::Error::New(env, "Each transfer must be a Buffer or Object");
+      }
+
+      // Set up transfer struct
+      tr.tx_buf = (unsigned long)txBuf.Data();
+      tr.rx_buf = (unsigned long)rxBuf.Data();
+      tr.len = txBuf.Length();
+
+      transfers.push_back(tr);
+      txRefs.push_back(Napi::Persistent(txBuf));
+      rxRefs.push_back(Napi::Persistent(rxBuf));
     }
+    catch (const Napi::Error& e) {
+      e.ThrowAsJavaScriptException();
+      return env.Null();
+    }
+  }
 
-    auto* worker = new TransferWorker(env, this,
-        std::move(transfers),
-        std::move(bufferRefs),
-        deferred);
-    worker->Queue();
+  auto* worker = new TransferWorker(env, this,
+    std::move(transfers),
+    std::move(txRefs),
+    std::move(rxRefs),
+    deferred);
+  worker->Queue();
 
-    return deferred.Promise();
+  return deferred.Promise();
 }
 
 void SPIDevice::TransferWorker::Execute() {
 
-    SPI_DEVICE_LOCK_GUARD;
+  SPI_DEVICE_LOCK_GUARD;
 
-    if (transfers.empty()) {
-        SetError("No transfers specified");
-        return;
-    }
+  if (transfers.empty()) {
+    SetError("No transfers specified");
+    return;
+  }
 
-    if (ioctl(device->fd, SPI_IOC_MESSAGE(transfers.size()), transfers.data()) < 1) {
-        SetError(std::string("SPI transfer failed: ") + GetSystemError());
-    }
+  if (ioctl(device->fd, SPI_IOC_MESSAGE(transfers.size()), transfers.data()) < 1) {
+    SetError(std::string("SPI transfer failed: ") + GetSystemError());
+  }
 }
 
 void SPIDevice::TransferWorker::OnOK() {
-    Napi::Env env = Env();
-    Napi::Array result = Napi::Array::New(env, bufferRefs.size());
+  Napi::Env env = Env();
+  Napi::Array result = Napi::Array::New(env, rxRefs.size());
 
-    for (size_t i = 0; i < bufferRefs.size(); i++) {
-        result.Set(i, bufferRefs[i].Value());
-    }
+  for (size_t i = 0; i < rxRefs.size(); i++) {
+    result.Set(i, rxRefs[i].Value());
+  }
 
-    deferred.Resolve(result);
+  deferred.Resolve(result);
 }
 
 void SPIDevice::TransferWorker::OnError(const Napi::Error& e) {
-    deferred.Reject(e.Value());
+  deferred.Reject(e.Value());
 }

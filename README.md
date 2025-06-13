@@ -192,7 +192,6 @@ setMaxSpeedHz(hz) | Sets clock speed (Hz).
 getMaxSpeedHz() | Returns current speed.
 setBitsPerWord(bits) | Sets bits per word (usually 8).
 getBitsPerWord() | Returns current bits per word.
-close() | Closes the SPI device.
 
 ### Transfer Object Parameters
 
@@ -240,6 +239,26 @@ With this test you can see if the SPI device works without the involvement of a 
 ```bash
 node examples/loopback.js
 ```
+The default device is `/dev/spidev0.0` but can be changed
+with the `--device` flag. Other flags for
+max_speed_hz (`--speed=<number>`),
+mode (`--mode=<0,1,2 or 3>`)
+and bits_per_word (`--bits=<8,16 or 32>`) can be set.
+
+### MFRC522
+
+The RC522 module (with MFRC522 NXP chip) can
+communicate with the contactless Mifare tags.
+This test performs a self test and then scans for
+tag UIDs (4, 7 or 10 bytes).
+
+```bash
+node examples/loopback.js
+```
+The default device is `/dev/spidev0.0` and can be changed
+with the `--device` flag. The `max_speed_hz` of 10Mhz can be change with the `--speed` flag (`--speed=<number>`). If the
+self test fails (in case of a clone MFRC522), it can be
+disabled with `--no-self-test`.
 
 ## Troubleshooting
 
@@ -292,6 +311,17 @@ Verify parameters match spidev.h constraints (e.g., valid mode).
 ### Build Issues
 
 Rebuild with `node-gyp rebuild --verbose`
+
+### Hardware connection problems
+
+For good connection, especially at speeds above 1Mhz,
+be sure
+* to keep wires or paths short
+* to keep wires or paths bundled together
+* to take ground (and power) from pins the closed
+to the MISO, MOSI, CS and CLCK pins in order to provide
+a ground return path
+* to thoroughly clean up flux after soldering
 
 ## License
 

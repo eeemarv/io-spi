@@ -1,7 +1,7 @@
 {
   "name": "io-spi",
   "version": "0.1.0",
-  "description": "Native Node.js addon for SPI devices on Linux with ioctl",
+  "description": "Promise Based Native Node.js Addon for SPI devices on Linux with ioctl",
   "license": "MIT",
   "author": "Maarten Vandekeybus",
   "main": "./index.mjs",
@@ -32,11 +32,14 @@
     "linux"
   ],
   "devDependencies": {
+    "@types/node": "^24.0.1",
     "node-gyp": "^11.2.0"
   },
   "dependencies": {
     "node-addon-api": "^8.3.1"
   },
   "gypfile": true,
-  "os": ["linux"]
+  "os": [
+    "linux"
+  ]
 }

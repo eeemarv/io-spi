@@ -2,16 +2,16 @@
   "targets": [{
     "target_name": "spi",
     "sources": [
-        "src/spi_mode.cc",
-        "src/spi_bits.cc",
-        "src/spi_speed.cc",
-        "src/spi_ioctl.cc",
-        "src/spi_validate_mode.cc",
-        "src/spi_validate_bits.cc",
-        "src/spi_validate_speed.cc",
-        "src/spi_init.cc",
-        "src/spi_device.cc",
-        "src/spi_transfer.cc"
+      "src/spi_mode.cc",
+      "src/spi_bits.cc",
+      "src/spi_speed.cc",
+      "src/spi_ioctl.cc",
+      "src/spi_validate_mode.cc",
+      "src/spi_validate_bits.cc",
+      "src/spi_validate_speed.cc",
+      "src/spi_init.cc",
+      "src/spi_device.cc",
+      "src/spi_transfer.cc"
     ],
     "include_dirs": [
       "<!@(node -p \"require('node-addon-api').include_dir\")",

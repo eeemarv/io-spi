@@ -5,16 +5,16 @@
 #include <linux/spi/spidev.h>  // For SPI_IOC_WR_MODE etc
 
 void SPIDevice::SetModeInternal(uint8_t mode) {
-    uint8_t read_mode = 0;
-    IoctlOrThrow(SPI_IOC_RD_MODE, &read_mode, "SPI_IOC_RD_MODE");
+  uint8_t read_mode = 0;
+  IoctlOrThrow(SPI_IOC_RD_MODE, &read_mode, "SPI_IOC_RD_MODE");
 
-    if (Env().IsExceptionPending()){
-        return;
-    }// stop on error
+  if (Env().IsExceptionPending()){
+    return;
+  } // stop on error
 
-    if (read_mode != mode) {
-        IoctlOrThrow(SPI_IOC_WR_MODE, &mode, "SPI_IOC_WR_MODE");
-    }
+  if (read_mode != mode) {
+    IoctlOrThrow(SPI_IOC_WR_MODE, &mode, "SPI_IOC_WR_MODE");
+  }
 }
 
 Napi::Value SPIDevice::SetMode(const Napi::CallbackInfo& info) {
@@ -28,9 +28,11 @@ Napi::Value SPIDevice::SetMode(const Napi::CallbackInfo& info) {
         return env.Null();
     }
 
-    uint8_t mode = info[0].As<Napi::Number>().Uint32Value() & 0x03;
+    uint32_t mode = info[0].As<Napi::Number>().Uint32Value();
 
-    SetModeInternal(mode);
+    ValidateMode(env, mode);
+
+    SetModeInternal(static_cast<uint8_t>(mode));
 
     return env.IsExceptionPending() ? env.Null() : env.Undefined();
 }

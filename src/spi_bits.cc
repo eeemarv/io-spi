@@ -11,39 +11,41 @@ void SPIDevice::SetBitsPerWordInternal(uint8_t bits) {
   }// stop on error
 
   if (read_bits != bits) {
-    IoctlOrThrow(SPI_IOC_WR_MODE, &bits, "SPI_IOC_WR_MODE");
+    IoctlOrThrow(SPI_IOC_WR_BITS_PER_WORD, &bits, "SPI_IOC_WR_BITS_PER_WORD");
   }
 }
 
 Napi::Value SPIDevice::SetBitsPerWord(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
+  Napi::Env env = info.Env();
 
-    SPI_LOCK_GUARD;
+  SPI_LOCK_GUARD;
 
-    if (info.Length() < 1 || !info[0].IsNumber()) {
-        Napi::TypeError::New(env, "Bits per word (usually 8) expected")
-            .ThrowAsJavaScriptException();
-        return env.Null();
-    }
+  if (info.Length() < 1 || !info[0].IsNumber()) {
+    Napi::TypeError::New(env, "Bits per word (usually 8) expected")
+      .ThrowAsJavaScriptException();
+    return env.Null();
+  }
 
-    uint8_t bits = info[0].As<Napi::Number>().Uint32Value();
+  uint32_t bits = info[0].As<Napi::Number>().Uint32Value();
 
-    SetBitsPerWordInternal(bits);
+  ValidateBitsPerWord(env, bits);
 
-    return env.IsExceptionPending() ? env.Null() : env.Undefined();
+  SetBitsPerWordInternal(static_cast<uint8_t>(bits));
+
+  return env.IsExceptionPending() ? env.Null() : env.Undefined();
 }
 
 Napi::Value SPIDevice::GetBitsPerWord(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
+  Napi::Env env = info.Env();
 
-    SPI_LOCK_GUARD;
+  SPI_LOCK_GUARD;
 
-    uint8_t bits;
-    IoctlOrThrow(SPI_IOC_RD_BITS_PER_WORD, &bits, "SPI_IOC_RD_BITS_PER_WORD");
+  uint8_t bits;
+  IoctlOrThrow(SPI_IOC_RD_BITS_PER_WORD, &bits, "SPI_IOC_RD_BITS_PER_WORD");
 
-    if (env.IsExceptionPending()){
-        return env.Null();
-    }
+  if (env.IsExceptionPending()){
+    return env.Null();
+  }
 
-    return Napi::Number::New(env, bits);
+  return Napi::Number::New(env, bits);
 }
