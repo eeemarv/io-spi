@@ -2,7 +2,7 @@
 
 /**
  * Optional parameters for individual SPI transfers.
- * Mirrors the Linux `spi_ioc_transfer` structure (except `pad`).
+ * Mirrors the Linux `spi_ioc_transfer` structure (except `pad` and `rx_buf`).
  */
 export interface SPITransfer {
   /** Transmit buffer (required) */
@@ -18,7 +18,7 @@ export interface SPITransfer {
   bits_per_word?: number;
 
   /** SPI chip select change flag (0 = keep asserted, 1 = release between messages) */
-  cs_change?: 0 | 1;
+  cs_change?: number;
 
   /**
    * Word delay in microseconds between words.
