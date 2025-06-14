@@ -1,13 +1,14 @@
 {
   "name": "@eeemarv/io-spi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Promise Based Native Node.js Addon for SPI devices on Linux with ioctl",
   "license": "MIT",
   "author": "Maarten Vandekeybus",
   "main": "./index.mjs",
   "exports": {
     "import": "./index.mjs",
-    "require": "./index.cjs"
+    "require": "./index.cjs",
+    "types": "./index.d.ts"
   },
   "type": "module",
   "types": "./index.d.ts",
