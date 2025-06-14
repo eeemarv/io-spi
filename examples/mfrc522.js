@@ -91,7 +91,7 @@ const read = async (addrAry) => {
       0x00
     ])
   ]);
-  return [...rxBuf.slice(1)]; // Skip 1 byte
+  return [...rxBuf].slice(1); // Skip 1 byte
 };
 
 /**

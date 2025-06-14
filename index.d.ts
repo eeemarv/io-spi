@@ -18,7 +18,7 @@ export interface SPITransfer {
   bits_per_word?: number;
 
   /** SPI chip select change flag (0 = keep asserted, 1 = release between messages) */
-  cs_change?: boolean;
+  cs_change?: 0 | 1;
 
   /**
    * Word delay in microseconds between words.
