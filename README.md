@@ -87,10 +87,11 @@ CE1 (GPIO7) | - | CS
 ## Installation
 
 ```bash
+npm install @eeemarv/io-spi
 
-#
-# Not published on npm yet, will follow later.
-#
+# OR
+
+yarn add @eeemarv/io-spi
 ```
 
 ## Prerequisites
@@ -111,7 +112,9 @@ sudo apt-get install build-essential python3
 
 ```js
 const SPIDevice = require('@eeemarv/io-spi');
+
 // OR
+
 import SPIDevice from '@eeemarv/io-spi';
 ```
 
@@ -141,6 +144,7 @@ console.log(spi.getMode()); // e.g., 2
 #### Simple Transfer (Uses Device Defaults)
 
 ```javascript
+
 spi.transfer([
   Buffer.from([0x01, 0x02])
 ]).then(([result]) => {
@@ -148,6 +152,7 @@ spi.transfer([
 }).catch((error) => {
   console.log(error);
 });
+
 ```
 
 #### Advanced Transfer (Per-Transfer Settings)
