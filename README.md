@@ -165,7 +165,7 @@ spi.transfer([
     tx_buf: Buffer.from([0x03, 0x04]), // required
     speed_hz: 500000,         // Temporary speed change
     delay_usecs: 100,            // Delay after transfer (microseconds)
-    cs_change: true           // Toggle CS after this transfer
+    cs_change: 1           // Toggle CS after this transfer
   },
   Buffer.from([0x05, 0x06])  // Reverts to device defaults
 ]).then((results) => {
@@ -244,6 +244,7 @@ With this test you can see if the SPI device works without the involvement of a 
 ```bash
 node examples/loopback.js
 ```
+
 The default device is `/dev/spidev0.0` but can be changed
 with the `--device` flag. Other flags for
 max_speed_hz (`--speed=<number>`),
@@ -260,6 +261,7 @@ tag UIDs (4, 7 or 10 bytes).
 ```bash
 node examples/loopback.js
 ```
+
 The default device is `/dev/spidev0.0` and can be changed
 with the `--device` flag. The `max_speed_hz` of 10Mhz can be change with the `--speed` flag (`--speed=<number>`). If the
 self test fails (in case of a clone MFRC522), it can be
@@ -321,6 +323,7 @@ Rebuild with `node-gyp rebuild --verbose`
 
 For good connection, especially at speeds above 1Mhz,
 be sure
+
 * to keep wires or paths short
 * to keep wires or paths bundled together
 * to take ground (and power) from pins the closed

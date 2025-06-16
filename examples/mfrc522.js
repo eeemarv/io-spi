@@ -352,7 +352,7 @@ const init = async () => {
 
 /**
  * Communicate with a tag through the MFRC522
- * @param {any} dataAry - sent to the card
+ * @param {number[]} dataAry - sent to the card
  * @returns {Promise<{success: boolean, data: number[], bitSize: number}>}
  */
 const transeive = async (dataAry) => {
