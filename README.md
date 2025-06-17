@@ -269,47 +269,86 @@ disabled with `--no-self-test`.
 
 ## Troubleshooting
 
+### Enable SPI
+
+Check out if SPI is enabled. To list all available SPI devices:
+
+```bash
+ls -l /dev/spi*
+```
+
+Check out the manual of your SBC on how to enable the SPI devices.
+
+If you have `raspi-config` (common on the Raspberry Pi), run
+
+```bash
+sudo raspi-config
+```
+
+Navigate to Interface options > Enable SPI.
+
+On the Orange Pi, run `orangepi-config`
+
+```bash
+sudo orangepi-config
+```
+
+Navigate to System  > Hardware > Toggle hardware configuration.
+
 ### Permission Denied
 
-If you get a "Permission denied" error when trying to open `/dev/spidev0.0`, it's likely because your user doesn't have the right group permissions.
+To allow non-root users to access the SPI device (e.g. `/dev/spidev0.0`, `/dev/spidev1.1`) without sudo, you need to modify the device permissions and group ownership permanently.
 
-#### ✅ Step 1: Check device permissions
+#### 1. Create a Dedicated Group for SPI Access
 
-List SPI devices:
+```bash
+sudo groupadd spi
+```
+
+#### 2. Add Your User to the Group
+
+```bash
+sudo usermod -aG spi $(whoami)  # Replace $(whoami) with the target username
+```
+
+(Log out and back in for the group change to take effect.)
+
+#### 3. Set a udev Rule to Change SPI Device Permissions
+
+Ubuntu, Debian and Raspbian use udev to manage device permissions. Create a new rule:
+
+```bash
+sudo nano /etc/udev/rules.d/90-spi.rules
+```
+
+Add this line to grant read/write access to the `spi` group:
+
+```bash
+SUBSYSTEM=="spidev", GROUP="spi", MODE="0660"
+```
+
+#### 4. Reload udev Rules & Trigger Changes
+
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+#### 5. Verify the Changes
+
+Check the SPI device permissions:
 
 ```bash
 ls -l /dev/spidev*
 ```
 
-Example output:
+Expected output:
 
 ```bash
-crw-rw----+ 1 root dialout 153, 0 ... /dev/spidev0.0
+crw-rw---- 1 root spi 153, 0 Jun 17 10:14 /dev/spidev1.1
 ```
 
-This shows the device belongs to group dialout.
-
-#### ✅ Step 2: Add your user to the dialout group
-
-```bash
-sudo usermod -aG dialout $USER
-```
-
-On Raspberry Pi OS or other systems that use spi or gpio groups (e.g., Raspberry Pi OS with Desktop):
-
-```bash
-sudo usermod -aG spi,gpio $USER
-```
-
-  You can check which groups exist by running `getent group` or `grep spi /etc/group`.
-
-#### ✅ Step 3: Log out and back in
-
-Group changes only apply after re-logging into your session, or you can reboot:
-
-```bash
-sudo reboot
-```
+Now, users in the `spi` group can access it without sudo.
 
 ### Invalid Arguments
 
@@ -330,6 +369,7 @@ be sure
 to the MISO, MOSI, CS and CLCK pins in order to provide
 a ground return path
 * to thoroughly clean up flux after soldering
+* that you are invoking the right spi device. E.g. on the Orange Pi Zero 3 only /dev/spidev1.1 is available on the pinout.
 
 ## License
 
