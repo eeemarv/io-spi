@@ -102,7 +102,7 @@ const testData = [
     let outStr = '\x1b[33mOut:\x1b[0m ';
     for (let b = 0; b < tAry.length; b++){
       const vIn = tAry[b];
-      const vOut = rAry[a];
+      const vOut = rAry[b];
       inStr += vIn.toString(16).padStart(2, '0');
       inStr += ' ';
       if (vIn === vOut){
