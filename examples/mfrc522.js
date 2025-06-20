@@ -23,13 +23,15 @@
  * your MFRC522 is a clone the self test may fail.
  * In that case it is useful to disable the self test.
  *
+ * --help, -h : Show this help message
+ *
  * Based on https://github.com/miguelbalboa/rfid
  * And https://github.com/firsttris/mfrc522-rpi
  * The NXP MFRC522 data sheet:
  * https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf
  */
 
-import SPIDevice from '../index.mjs';
+import SPIDevice from '@eeemarv/io-spi';
 import { setTimeout } from 'timers/promises';
 import { PCD_Cmd } from './mfrc522_data/pcd_command.js';
 import { PCD_Reg } from './mfrc522_data/pcd_reg.js';
@@ -292,6 +294,25 @@ const initRegs = async () => {
 };
 
 /**
+ * Show the help message
+ * @returns {void}
+ */
+const showHelp = () => {
+  console.log(`
+Usage: node examples/mfrc522.js [options]
+
+This script initializes the MFRC522 RFID reader and performs a self-test.
+It reads UIDs from Mifare tags and displays them in hexadecimal format.
+
+Options:
+  --speed=<number>, -s=<number>    Set the maximum clock speed in Hz. Default is 10_000_000 (10MHz).
+  --device=<path>, -d=<path>       Set the SPI device path. Default is /dev/spidev0.0.
+  --no-self-test, -n               Disable the self-test. Useful if your MFRC522 is a clone.
+  --help, -h                       Show this help message.
+`);
+};
+
+/**
  * Initialize communication with the MFRC522
  * @return {Promise<void>}
  */
@@ -299,29 +320,65 @@ const init = async () => {
   let speed = 10_000_000;
   let device = '/dev/spidev0.0';
   let selfTestEnabled = true;
+  let skipArg = false;
 
   const args = process.argv.slice(2);
 
-  args.forEach((arg, i) => {
-    if (arg === '--no-self-test'){
-      selfTestEnabled = false;
-      return;
-    }
+  try {
+    args.forEach((arg, i) => {
+      let key = undefined;
+      let value = undefined;
 
-    if (arg.startsWith('--speed')) {
-      const speedStr = arg.includes('=') ? arg.split('=')[1] : args[i + 1];
-      if (speedStr){
-        speed = Number(speedStr.replace(/_/g, ''));
+      if (skipArg) {
+        skipArg = false;
+        return;
       }
-    }
 
-    if (arg.startsWith('--device')) {
-      const deviceStr = arg.includes('=') ? arg.split('=')[1] : args[i + 1];
-      if (deviceStr){
-        device = deviceStr;
+      if (arg.includes('=')) {
+        // If the argument is in the form --key=value, we can skip the next argument
+        [key, value] = arg.split('=');
+      } else {
+        // If the argument is in the form --key value, we need to check the next argument
+        key = arg;
+        value = args[i + 1];
+        skipArg = true; // Skip the next argument since it's the value for this key
       }
-    }
-  });
+      if (key === '--speed' || key === '-s') {
+        if (!value) {
+          throw new Error('Missing value for --speed');
+        }
+        speed = Number(value.replace(/_/g, ''));
+        if (isNaN(speed) || speed <= 0) {
+          throw new Error(`Invalid speed value: ${value}`);
+        }
+        return;
+      }
+      if (key === '--device' || key === '-d') {
+        if (!value) {
+          throw new Error('Missing value for --device');
+        }
+        device = value;
+        if (typeof device !== 'string' || !device.startsWith('/dev/spidev')) {
+          throw new Error(`Invalid device path: ${device}`);
+        }
+        return;
+      }
+      if (key === '--no-self-test' || key === '-n') {
+        selfTestEnabled = false;
+        return;
+      }
+      if (key === '--help' || key === '-h') {
+        showHelp();
+        process.exit(0);
+      }
+
+      throw new Error(`Unknown argument: ${arg}`);
+    });
+  } catch (err) {
+    console.error('\x1b[1;31mError parsing arguments:\x1b[0m', err.message);
+    showHelp();
+    process.exit(1);
+  }
 
   spi = new SPIDevice(device, {
     max_speed_hz: speed

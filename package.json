@@ -13,7 +13,7 @@
   "type": "module",
   "types": "./index.d.ts",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "install": "node-gyp rebuild",
@@ -34,7 +34,9 @@
   ],
   "devDependencies": {
     "@types/node": "^24.0.1",
-    "node-gyp": "^11.2.0"
+    "mock-fs": "^5.5.0",
+    "node-gyp": "^11.2.0",
+    "node-libgpiod": "^0.5.2"
   },
   "dependencies": {
     "node-addon-api": "^8.3.1"
@@ -42,6 +44,14 @@
   "gypfile": true,
   "os": [
     "linux"
+  ],
+  "files": [
+    "src/*",
+    "binding.gyp",
+    "index.cjs",
+    "index.d.ts",
+    "index.mjs",
+    "examples/loopback.js"
   ],
   "repository": {
     "type": "git",

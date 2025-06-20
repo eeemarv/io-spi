@@ -1,15 +1,25 @@
 # Node Native SPI Addon
 
+[![Node.js Version Support](https://img.shields.io/node/v/@eeemarv/io-spi)](https://www.npmjs.com/package/@eeemarv/io-spi)
 ![TypeScript](https://img.shields.io/badge/types-included-blue.svg)
+[![License](https://img.shields.io/npm/l/@eeemarv/io-spi.svg)](https://github.com/eeemarv/io-spi/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@eeemarv/io-spi.svg)](https://www.npmjs.com/package/@eeemarv/io-spi)
+[![Downloads](https://img.shields.io/npm/dm/@eeemarv/io-spi.svg)](https://www.npmjs.com/package/@eeemarv/io-spi)
+[![Linux Only](https://img.shields.io/badge/platform-Linux-yellow)](https://en.wikipedia.org/wiki/Linux)
 
-A high-performance Node.js native addon for SPI communication on Linux, leveraging direct spidev.h APIs.
+
+A high-performance Node.js native addon for SPI communication on Linux, leveraging direct `spidev.h` APIs.
 Features
 
-* Promise-based transfers with configurable per-transfer settings.
+* Async/await friendly **Promise-based transfers** with configurable per-transfer settings.
 
-* Dynamic reconfiguration of mode, speed_hz, and bits_per_word.
+* **Batched transfers**: Submit multiple SPI transactions in one call for maximum performance.
+
+* **Zero abstraction**: Direct mapping to the Linux SPI interface (`spi_ioc_transfer`).
 
 * Full support for Linux SPI parameters (e.g., delay_usecs, cs_change).
+
+* Dynamic reconfiguration of mode, speed_hz, and bits_per_word.
 
 * Getters for current device settings.
 
@@ -193,8 +203,8 @@ Method | Description
 transfer(transfers) | Returns a Promise<Buffer[]> for all transfers. Each transfer can override settings (see below).
 setMode(mode) | Sets SPI mode. Throws if invalid.
 getMode() | Returns current mode.
-setMaxSpeedHz(hz) | Sets clock speed (Hz).
-getMaxSpeedHz() | Returns current speed.
+setMaxSpeedHz(hz) | Sets maximum clock speed (Hz).
+getMaxSpeedHz() | Returns current maximum speed.
 setBitsPerWord(bits) | Sets bits per word (usually 8).
 getBitsPerWord() | Returns current bits per word.
 
@@ -237,7 +247,12 @@ No need to install @types/... — types are bundled with the package.
 
 ## Examples
 
+The loopback test is the only example included in the npm
+package. More examples can be found in [the repository on Github](https://github.com/eeemarv/io-spi/blob/main/docs/examples.md).
+
 ### Loopback Test
+
+![Loopback test on a Orange Pi 3 Zero](https://raw.githubusercontent.com/eeemarv/io-spi/main/images/opiz3_loopback.webp)
 
 With this test you can see if the SPI device works without the involvement of a slave device. Connect the MOSI pin directly to the MISO pin, run the test and see if the data matches.
 
@@ -251,21 +266,7 @@ max_speed_hz (`--speed=<number>`),
 mode (`--mode=<0,1,2 or 3>`)
 and bits_per_word (`--bits=<8,16 or 32>`) can be set.
 
-### MFRC522
-
-The RC522 module (with MFRC522 NXP chip) can
-communicate with the contactless Mifare tags.
-This test performs a self test and then scans for
-tag UIDs (4, 7 or 10 bytes).
-
-```bash
-node examples/loopback.js
-```
-
-The default device is `/dev/spidev0.0` and can be changed
-with the `--device` flag. The `max_speed_hz` of 10Mhz can be change with the `--speed` flag (`--speed=<number>`). If the
-self test fails (in case of a clone MFRC522), it can be
-disabled with `--no-self-test`.
+![Loopback Test Terminal](https://raw.githubusercontent.com/eeemarv/io-spi/main/images/loopback.png)
 
 ## Troubleshooting
 

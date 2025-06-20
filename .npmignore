@@ -1,0 +1,7 @@
+.github/
+.vscode/
+build/
+test/
+images/
+docs/
+*.log
