@@ -1,6 +1,6 @@
 {
   "name": "@eeemarv/io-spi",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Promise Based Native Node.js Addon for SPI devices on Linux",
   "license": "MIT",
   "author": "Maarten Vandekeybus",

@@ -1,6 +1,6 @@
 # Examples
 
-To keep the npm package light, the loopback test is the only only one included. For the other examples see (the repository on Github)[https.//github.com/eeemarv/io-spi].
+To keep the npm package light, the loopback test is the only only one included. For the other examples see (the repository on Github)[https://github.com/eeemarv/io-spi].
 
 To install from Github:
 
@@ -46,7 +46,7 @@ Options:
 
 ## MFRC522
 
-![MFRC522 test on a Orange Pi 3 Zero](https://raw.githubusercontent.com/eeemarv/io-spi/main/images/opiz3_mfrc522.webp)
+![MFRC522 test on a Orange Pi 3 Zero](https://raw.githubusercontent.com/eeemarv/io-spi/main/images/opiz3_rc522.webp)
 
 The RC522 module (with MFRC522 NXP chip) can
 communicate with the contactless Mifare tags.
