@@ -248,7 +248,7 @@ No need to install @types/... — types are bundled with the package.
 ## Examples
 
 The loopback test is the only example included in the npm
-package. More examples can be found in [the repository on Github](https://github.com/eeemarv/io-spi/blob/main/docs/examples.md).
+package. More examples can be found in [a separate repository on Github](https://github.com/eeemarv/io-spi-examples#readme).
 
 ### Loopback Test
 
@@ -257,7 +257,7 @@ package. More examples can be found in [the repository on Github](https://github
 With this test you can see if the SPI device works without the involvement of a slave device. Connect the MOSI pin directly to the MISO pin, run the test and see if the data matches.
 
 ```bash
-node examples/loopback.js
+node loopback.js
 ```
 
 The default device is `/dev/spidev0.0` but can be changed
@@ -266,7 +266,7 @@ max_speed_hz (`--speed=<number>`),
 mode (`--mode=<0,1,2 or 3>`)
 and bits_per_word (`--bits=<8,16 or 32>`) can be set.
 
-![Loopback Test Terminal](https://raw.githubusercontent.com/eeemarv/io-spi/main/images/loopback.png)
+![Loopback Test Terminal](https://raw.githubusercontent.com/eeemarv/io-spi/main/images/cli_loopback.png)
 
 ## Troubleshooting
 

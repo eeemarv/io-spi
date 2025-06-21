@@ -35,8 +35,7 @@
   "devDependencies": {
     "@types/node": "^24.0.1",
     "mock-fs": "^5.5.0",
-    "node-gyp": "^11.2.0",
-    "node-libgpiod": "^0.5.2"
+    "node-gyp": "^11.2.0"
   },
   "dependencies": {
     "node-addon-api": "^8.3.1"

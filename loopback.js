@@ -7,7 +7,7 @@
  * The data send should match the data received.
  *
  * Run with:
- * node examples/looback.js
+ * node looback.js
  *
  * Optional flags:
  *
