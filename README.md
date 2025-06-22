@@ -258,13 +258,11 @@ With this test you can see if the SPI device works without the involvement of a 
 
 ```bash
 node loopback.js
+# Use the `--help` flag to see all possible configurations.
 ```
 
 The default device is `/dev/spidev0.0` but can be changed
-with the `--device` flag. Other flags for
-max_speed_hz (`--speed=<number>`),
-mode (`--mode=<0,1,2 or 3>`)
-and bits_per_word (`--bits=<8,16 or 32>`) can be set.
+with the `--device` flag.
 
 ![Loopback Test Terminal](https://raw.githubusercontent.com/eeemarv/io-spi/main/images/cli_loopback.png)
 
@@ -306,15 +304,7 @@ To allow non-root users to access the SPI device (e.g. `/dev/spidev0.0`, `/dev/s
 sudo groupadd spi
 ```
 
-#### 2. Add Your User to the Group
-
-```bash
-sudo usermod -aG spi $(whoami)  # Replace $(whoami) with the target username
-```
-
-(Log out and back in for the group change to take effect.)
-
-#### 3. Set a udev Rule to Change SPI Device Permissions
+#### 2. Set a udev Rule to Change SPI Device Permissions
 
 Ubuntu, Debian and Raspbian use udev to manage device permissions. Create a new rule:
 
@@ -328,14 +318,14 @@ Add this line to grant read/write access to the `spi` group:
 SUBSYSTEM=="spidev", GROUP="spi", MODE="0660"
 ```
 
-#### 4. Reload udev Rules & Trigger Changes
+#### 3. Reload udev Rules & Trigger Changes
 
 ```bash
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 ```
 
-#### 5. Verify the Changes
+#### 4. Verify the Changes
 
 Check the SPI device permissions:
 
@@ -350,6 +340,15 @@ crw-rw---- 1 root spi 153, 0 Jun 17 10:14 /dev/spidev1.1
 ```
 
 Now, users in the `spi` group can access it without sudo.
+
+
+#### 5. Add Your User to the Group
+
+```bash
+sudo usermod -aG spi $(whoami)  # Replace $(whoami) with the target username
+```
+
+(Log out and back in for the group change to take effect.)
 
 ### Invalid Arguments
 
